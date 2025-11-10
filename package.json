@@ -2,7 +2,17 @@
   "name": "jsx-spread-attributes",
   "displayName": "jsx-spread-attributes",
   "description": "Spread attributes to object format",
-  "version": "0.0.2",
+  "version": "0.0.3",
+  "license": "MIT",
+  "publisher": "HansOleGjerdrum",
+  "icon": "images/icon.png",
+  "keywords": [
+    "jsx",
+    "react",
+    "javascript",
+    "typescript",
+    "refactoring"
+  ],
   "engines": {
     "vscode": "^1.100.0"
   },
