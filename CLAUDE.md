@@ -55,3 +55,20 @@ Code Action kinds are constructed via `vscode.CodeActionKind.Refactor.append(...
 ## Diagnostic logging
 
 The extension creates an output channel named `jsx-spread-attributes` (visible in the VS Code Output panel). Refactor invocations, parse stats, and match decisions are logged there — useful when a refactor unexpectedly doesn't appear at the cursor.
+
+## Releasing & publishing
+
+**Publish by uploading the VSIX in the browser. Do not use `vsce publish`.** The CLI route was tried exhaustively in 0.1.1 and is a dead end for this project:
+
+- The publisher `HansOleGjerdrum` is owned by `murdrejg@gmail.com`, which has no Azure subscription. PAT generation requires an Azure DevOps organization, which requires an Azure subscription, which requires creating one (free tier exists but needs identity verification). `--azure-credential` hangs silently for the same reason — `DefaultAzureCredential` can't acquire a Marketplace-scoped token without a subscription.
+- The Systek email `hans.ole.gjerdrum@systek.no` cannot be added as a co-publisher; Marketplace returns "Invalid domain" because `systek.no` is Google Workspace, not Entra ID.
+
+Procedure:
+
+1. Bump `version` in `package.json`, add a CHANGELOG entry, commit, tag `vX.Y.Z`, push.
+2. `pnpm run vsix:package` to produce `jsx-spread-attributes-X.Y.Z.vsix` at the repo root.
+3. Copy the VSIX into `downloads/` and commit it (matches the `feat(downloads): added latest downloadable version` pattern).
+4. Sign into https://marketplace.visualstudio.com/manage/publishers/HansOleGjerdrum as `murdrejg@gmail.com`.
+5. On the `jsx-spread-attributes` row, open the "..." / actions menu, choose **Update** (or use the upload icon), and upload the VSIX from `downloads/`. Marketplace validates and publishes.
+
+If `pnpm run vsix:package` fails with TS errors about JSX in `dist/tmp.tsx` or similar, delete that scratch file — it's leftover from F5 dev-host testing inside the gitignored build dir, and ts-loader's full-project type-check picks it up. (`tsconfig.json` now has `"jsx": "react"` which mitigates this for valid JSX scratch files, but stray files in `dist/` are still better deleted.)
