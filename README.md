@@ -10,10 +10,11 @@ This small VS Code extension provides two-way conversion between JSX attributes 
 
 ```jsx
 // Before
-<MyComp a="1" b={x} c />
+const d = "D";
+<MyComp a="1" b={b} c d={d} />
 
 // After
-<MyComp {...{ a: "1", b, c: true }} />
+<MyComp {...{ b, d, a: "1", c: true }} />
 ```
 
 2. Convert spread object back to individual attributes:

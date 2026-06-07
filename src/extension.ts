@@ -58,11 +58,8 @@ function rewriteSpreadToAttributes(jsxElement: t.JSXOpeningElement): string {
 
       if (t.isExpression(prop.value)) {
         const value = prop.value;
-        if (t.isIdentifier(value) && value.name === name) {
-          // For shorthand properties like { x } -> x
-          attributes.push(t.jsxAttribute(t.jsxIdentifier(name), null));
-        } else if (t.isBooleanLiteral(value) && value.value === true) {
-          // For boolean true -> attribute with no value
+        if (t.isBooleanLiteral(value) && value.value === true) {
+          // For boolean true -> attribute with no value (e.g. `{ c: true }` -> `c`)
           attributes.push(t.jsxAttribute(t.jsxIdentifier(name), null));
         } else if (t.isStringLiteral(value)) {
           // For string literals -> attribute="value"
@@ -140,7 +137,11 @@ function rewriteAttributesToSpread(jsxElement: t.JSXOpeningElement): string {
         ? t.stringLiteral(attrName) // Use string literal for names with hyphens
         : t.identifier(attrName); // Use identifier for simple names
 
-      const property = t.objectProperty(propertyKey, value);
+      const isShorthand =
+        t.isIdentifier(propertyKey) &&
+        t.isIdentifier(value) &&
+        value.name === propertyKey.name;
+      const property = t.objectProperty(propertyKey, value, false, isShorthand);
       regularProperties.push(property);
     } else if (t.isJSXSpreadAttribute(attr)) {
       // For spread attributes, extract the object expression if possible
@@ -156,8 +157,14 @@ function rewriteAttributesToSpread(jsxElement: t.JSXOpeningElement): string {
     }
   }
 
-  // 2. Create the spread object with regular properties first
-  const properties: (t.ObjectProperty | t.SpreadElement)[] = regularProperties;
+  // 2. Create the spread object with shorthand properties first, then the rest
+  // (stable within each group), so e.g. `a={a} b="B" c={c}` → `{ a, c, b: "B" }`.
+  const orderedRegularProperties = [
+    ...regularProperties.filter((p) => p.shorthand),
+    ...regularProperties.filter((p) => !p.shorthand),
+  ];
+  const properties: (t.ObjectProperty | t.SpreadElement)[] =
+    orderedRegularProperties;
 
   try {
     outputChannel.appendLine(
