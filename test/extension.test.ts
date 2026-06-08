@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import * as vscode from "vscode";
-import { ConciseArrowProvider } from "../extension";
+import { ConciseArrowProvider } from "../src/extension";
 
 const provider = new ConciseArrowProvider();
 
@@ -28,13 +28,22 @@ suite("concise-arrow", () => {
     assert.ok(titles.includes("Remove braces from arrow function"));
   });
 
-  test("offers add-braces for concise body", async () => {
+  test("offers add-braces-no-return for concise body", async () => {
     const actions = await actionsAt(
       "const f = () => 1 + 2;",
       new vscode.Position(0, 12)
     );
     const titles = actions.map((a) => a.title);
-    assert.ok(titles.includes("Add braces to arrow function"));
+    assert.ok(titles.includes("Add braces (no return)"));
+  });
+
+  test("does not offer add-braces-no-return when body is already a block", async () => {
+    const actions = await actionsAt(
+      "const f = () => { return 1; };",
+      new vscode.Position(0, 12)
+    );
+    const titles = actions.map((a) => a.title);
+    assert.ok(!titles.includes("Add braces (no return)"));
   });
 
   test("does not offer remove-braces for multi-statement body", async () => {
