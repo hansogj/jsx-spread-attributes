@@ -1,21 +1,30 @@
 # concise-arrow
 
-Toggle arrow function bodies between concise (`() => expr`) and block (`() => { ... }`) form — including the single-`ExpressionStatement` case that TypeScript's built-in refactor skips.
+Arrow-function refactors that fill the gaps TypeScript's built-in refactor leaves.
 
 ## What it does
 
-Two-way refactor between the two arrow body shapes:
+Two refactors, each covering a case the built-in TS refactor doesn't:
 
 ```ts
-// Remove braces
+// Remove braces — handles the single ExpressionStatement body case (TS skips this)
 () => { console.log(x); }   →   () => console.log(x)
 () => { return x + 1; }     →   () => x + 1
 
-// Add braces
-() => x + 1                 →   () => { return x + 1; }
+// Add braces (no return) — wraps the body as a statement, dropping the return value
+() => setOpen(true)         →   () => { setOpen(true); }
 ```
 
-The built-in TypeScript refactor only offers brace removal when the body is *exactly* a `return` statement. This extension also handles single-`ExpressionStatement` bodies — the common shape produced by side-effectful callbacks like `console.log`, `arr.push`, `map.set`, etc.
+For the *other* combinations the built-in `tsserver` refactor already handles them, so concise-arrow stays out of the way:
+
+| Source                       | Tool                                         |
+| ---------------------------- | -------------------------------------------- |
+| `() => { return x; }` → `() => x` | `tsserver` (also concise-arrow as a bonus)   |
+| `() => { f(); }` → `() => f()`    | **concise-arrow only**                       |
+| `() => x` → `() => { return x; }` | `tsserver`                                   |
+| `() => f()` → `() => { f(); }`    | **concise-arrow only** (no-return variant)   |
+
+The "add braces (no return)" variant is the natural shape for event handlers, `useEffect` bodies, and other void callbacks — when you want to add more statements without preserving the return value.
 
 Async, generic, and typed arrows are preserved:
 
@@ -47,12 +56,12 @@ code --install-extension concise-arrow-*.vsix
 - Open a `.js` / `.ts` / `.jsx` / `.tsx` file.
 - Place the caret inside an arrow function.
 - Trigger the lightbulb (`Ctrl+.` / `Cmd+.`) or right-click → `Refactor…`.
-- Pick `Remove braces from arrow function` or `Add braces to arrow function`.
+- Pick `Remove braces from arrow function` or `Add braces (no return)`.
 
 Also exposed as commands:
 
 - `concise-arrow.removeBracesCommand`
-- `concise-arrow.addBracesCommand`
+- `concise-arrow.addBracesNoReturnCommand`
 
 ## Languages
 

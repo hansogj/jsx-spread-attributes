@@ -4,9 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-VS Code extension (`concise-arrow`, publisher `HansOleGjerdrum`) that toggles arrow function bodies between concise (`() => expr`) and block (`() => { ... }`) form. Goes beyond the built-in TypeScript refactor by also handling the single-`ExpressionStatement` case (`() => { f(); }` → `() => f()`), not just the `ReturnStatement` case.
+VS Code extension (`concise-arrow`, publisher `HansOleGjerdrum`) that adds two arrow-function refactors filling gaps in the built-in TypeScript refactor:
 
-Exposed as both Code Actions (lightbulb / Refactor menu under kinds `refactor.conciseArrow.removeBraces` and `refactor.conciseArrow.addBraces`) and commands (`concise-arrow.removeBracesCommand`, `concise-arrow.addBracesCommand`).
+- **Remove braces** — handles `() => { stmt; }` → `() => stmt` (both `ExpressionStatement` and `ReturnStatement` bodies). The `ExpressionStatement` case is the one `tsserver` skips.
+- **Add braces (no return)** — handles `() => expr` → `() => { expr; }`. The bare-statement form `tsserver` won't produce; `tsserver` always emits `{ return expr; }`.
+
+The `() => { return X; }` → `() => X` direction and the `() => X` → `() => { return X; }` direction are deliberately left to `tsserver` so we don't duplicate built-in actions in the refactor menu.
+
+Exposed as both Code Actions (lightbulb / Refactor menu under kinds `refactor.conciseArrow.removeBraces` and `refactor.conciseArrow.addBracesNoReturn`) and commands (`concise-arrow.removeBracesCommand`, `concise-arrow.addBracesNoReturnCommand`).
 
 Activates on `javascript`, `typescript`, `javascriptreact`, `typescriptreact`. Engine `vscode ^1.100.0`. Uses pnpm.
 
@@ -34,13 +39,13 @@ Single-file implementation: `src/extension.ts`. Layers:
 
 2. **`findArrow`** — traverses the AST and picks the *deepest* `ArrowFunctionExpression` whose range intersects the selection and that's eligible for at least one of the two refactors.
 
-3. **Pure transformers** — `removeBraces` and `addBraces` take an `ArrowFunctionExpression` and return a fresh one with the body swapped. `cloneArrowShape` carries over `params`, `async`, `generator`, `returnType`, and `typeParameters` so generics and type annotations survive the rewrite. `@babel/generator` handles output formatting (object-literal parenthesization, JSX bodies, quoting).
+3. **Pure transformers** — `removeBraces` and `addBracesNoReturn` take an `ArrowFunctionExpression` and return a fresh one with the body swapped. `cloneArrowShape` carries over `params`, `async`, `generator`, `returnType`, and `typeParameters` so generics and type annotations survive the rewrite. `@babel/generator` handles output formatting (object-literal parenthesization, JSX bodies, quoting).
 
 Eligibility predicates:
 - `canRemoveBraces`: block body containing exactly one `ExpressionStatement` *or* one `ReturnStatement` with an argument.
-- `canAddBraces`: any non-block (concise) body.
+- `canAddBracesNoReturn`: any non-block (concise) body.
 
-Multi-statement bodies, empty blocks, and bare `return;` (no argument) are deliberately not handled — converting them would change observable semantics in ways the refactor can't justify.
+Multi-statement bodies, empty blocks, and bare `return;` (no argument) are deliberately not handled — converting them would change observable semantics in ways the refactor can't justify. The `addBracesNoReturn` action discards the body's return value by design (that's the whole point — the return-preserving variant is already provided by `tsserver`).
 
 Code Action kinds are constructed via `vscode.CodeActionKind.Refactor.append(...)` and must match the `kind` strings registered in `package.json` under `contributes.codeActions` for the lightbulb to advertise them.
 

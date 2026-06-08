@@ -21,12 +21,12 @@ const isSupported = (id: string): id is SupportedLang =>
 const KIND_REMOVE = vscode.CodeActionKind.Refactor.append(
   "conciseArrow.removeBraces"
 );
-const KIND_ADD = vscode.CodeActionKind.Refactor.append(
-  "conciseArrow.addBraces"
+const KIND_ADD_NO_RETURN = vscode.CodeActionKind.Refactor.append(
+  "conciseArrow.addBracesNoReturn"
 );
 
 const TITLE_REMOVE = "Remove braces from arrow function";
-const TITLE_ADD = "Add braces to arrow function";
+const TITLE_ADD_NO_RETURN = "Add braces (no return)";
 
 interface ArrowMatch {
   node: t.ArrowFunctionExpression;
@@ -63,7 +63,7 @@ function canRemoveBraces(node: t.ArrowFunctionExpression): boolean {
   );
 }
 
-function canAddBraces(node: t.ArrowFunctionExpression): boolean {
+function canAddBracesNoReturn(node: t.ArrowFunctionExpression): boolean {
   return !t.isBlockStatement(node.body);
 }
 
@@ -88,11 +88,11 @@ function removeBraces(
   return cloneArrowShape(node, expr);
 }
 
-function addBraces(
+function addBracesNoReturn(
   node: t.ArrowFunctionExpression
 ): t.ArrowFunctionExpression {
   const block = t.blockStatement([
-    t.returnStatement(node.body as t.Expression),
+    t.expressionStatement(node.body as t.Expression),
   ]);
   return cloneArrowShape(node, block);
 }
@@ -131,7 +131,7 @@ function findArrow(
       if (!range || !range.intersection(selection)) {
         return;
       }
-      if (!canRemoveBraces(path.node) && !canAddBraces(path.node)) {
+      if (!canRemoveBraces(path.node) && !canAddBracesNoReturn(path.node)) {
         return;
       }
       if (!best || depth > best.depth) {
@@ -191,14 +191,14 @@ export class ConciseArrowProvider implements vscode.CodeActionProvider {
         )
       );
     }
-    if (canAddBraces(match.node)) {
+    if (canAddBracesNoReturn(match.node)) {
       actions.push(
         buildAction(
           document,
           match.range,
-          addBraces(match.node),
-          TITLE_ADD,
-          KIND_ADD
+          addBracesNoReturn(match.node),
+          TITLE_ADD_NO_RETURN,
+          KIND_ADD_NO_RETURN
         )
       );
     }
@@ -242,7 +242,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider(selectors, provider, {
-      providedCodeActionKinds: [KIND_REMOVE, KIND_ADD],
+      providedCodeActionKinds: [KIND_REMOVE, KIND_ADD_NO_RETURN],
     }),
     vscode.commands.registerCommand(
       "concise-arrow.removeBracesCommand",
@@ -253,10 +253,10 @@ export function activate(context: vscode.ExtensionContext): void {
       )
     ),
     vscode.commands.registerCommand(
-      "concise-arrow.addBracesCommand",
+      "concise-arrow.addBracesNoReturnCommand",
       runCommand(
         provider,
-        KIND_ADD,
+        KIND_ADD_NO_RETURN,
         "No concise-body arrow function at cursor."
       )
     )

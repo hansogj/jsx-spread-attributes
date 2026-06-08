@@ -1,7 +1,7 @@
 {
   "name": "concise-arrow",
   "displayName": "Concise Arrow",
-  "description": "Toggle arrow function bodies between concise (`() => expr`) and block (`() => { ... }`) form, including the single-`ExpressionStatement` case TypeScript's built-in refactor skips.",
+  "description": "Arrow-function refactors that fill the gaps TypeScript's built-in refactor leaves: remove braces from single-`ExpressionStatement` bodies, and add no-return braces to a concise body.",
   "version": "0.1.0",
   "license": "MIT",
   "publisher": "HansOleGjerdrum",
@@ -47,8 +47,8 @@
         "title": "Concise Arrow: Remove Braces from Arrow Function"
       },
       {
-        "command": "concise-arrow.addBracesCommand",
-        "title": "Concise Arrow: Add Braces to Arrow Function"
+        "command": "concise-arrow.addBracesNoReturnCommand",
+        "title": "Concise Arrow: Add Braces (No Return)"
       }
     ],
     "codeActions": [
@@ -63,8 +63,8 @@
         ]
       },
       {
-        "title": "Add braces to arrow function",
-        "kind": "refactor.conciseArrow.addBraces",
+        "title": "Add braces (no return)",
+        "kind": "refactor.conciseArrow.addBracesNoReturn",
         "languages": [
           "javascript",
           "typescript",
@@ -81,7 +81,7 @@
           "when": "editorLangId =~ /(javascript|typescript)(react)?/ && !editorReadonly"
         },
         {
-          "command": "concise-arrow.addBracesCommand",
+          "command": "concise-arrow.addBracesNoReturnCommand",
           "group": "refactor@2",
           "when": "editorLangId =~ /(javascript|typescript)(react)?/ && !editorReadonly"
         }
