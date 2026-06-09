@@ -13,5 +13,19 @@
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
     "package:vsix": "pnpm -r run vsix:package"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "tslint",
+        "typescript",
+        "mocha",
+        "@babel/core",
+        "@babel/traverse",
+        "@babel/generator",
+        "@babel/helper-fixtures",
+        "charcodes"
+      ]
+    }
   }
 }

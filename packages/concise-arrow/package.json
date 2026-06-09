@@ -16,20 +16,6 @@
   "engines": {
     "vscode": "^1.100.0"
   },
-  "pnpm": {
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "tslint",
-        "typescript",
-        "mocha",
-        "@babel/core",
-        "@babel/traverse",
-        "@babel/generator",
-        "@babel/helper-fixtures",
-        "charcodes"
-      ]
-    }
-  },
   "categories": [
     "Other"
   ],
