@@ -1,0 +1,17 @@
+{
+  "name": "vscode-extensions",
+  "private": true,
+  "version": "0.0.0",
+  "description": "VS Code extensions monorepo (jsx-spread-attributes, concise-arrow).",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hansogj/vscode-extensions"
+  },
+  "scripts": {
+    "build": "pnpm -r run compile",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "package:vsix": "pnpm -r run vsix:package"
+  }
+}
