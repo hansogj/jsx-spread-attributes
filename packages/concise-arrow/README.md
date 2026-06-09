@@ -43,12 +43,19 @@ Output formatting follows `@babel/generator` and is not configurable.
 ## Installation
 
 - **From Marketplace** (when published): search for `concise-arrow` in the Extensions view.
-- **From a local VSIX**:
+- **From the archived VSIX in this repo** — no clone needed:
+
+```bash
+curl -LO https://raw.githubusercontent.com/hansogj/vscode-extensions/main/packages/concise-arrow/downloads/concise-arrow-0.1.0.vsix
+code --install-extension concise-arrow-0.1.0.vsix
+```
+
+- **By building locally** (when iterating on the extension):
 
 ```bash
 pnpm install
-pnpm run vsix:package
-code --install-extension concise-arrow-*.vsix
+pnpm --filter concise-arrow run vsix:package
+code --install-extension packages/concise-arrow/concise-arrow-*.vsix
 ```
 
 ## Usage

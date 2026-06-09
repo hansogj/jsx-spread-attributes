@@ -31,21 +31,20 @@ The exact output formatting follows Babel-generated code and may vary slightly.
 
 ## Installation
 
-There are two ways to install:
-
-- From Marketplace (when published): search for `jsx-spread-attributes` in the Extensions view.
-- Locally from a VSIX: build and package the extension and install the generated `.vsix` file.
-
-To build a VSIX locally:
+- **From Marketplace**: search for `jsx-spread-attributes` in the Extensions view.
+- **From the archived VSIX in this repo** — no clone needed:
 
 ```bash
-# install deps
+curl -LO https://raw.githubusercontent.com/hansogj/vscode-extensions/main/packages/jsx-spread-attributes/downloads/jsx-spread-attributes-0.1.1.vsix
+code --install-extension jsx-spread-attributes-0.1.1.vsix
+```
+
+- **By building locally** (when iterating on the extension):
+
+```bash
 pnpm install
-# build package
-pnpm run package
-# resulting file: ./*.vsix
-# install with code
-code --install-extension path/to/your.vsix
+pnpm --filter jsx-spread-attributes run vsix:package
+code --install-extension packages/jsx-spread-attributes/jsx-spread-attributes-*.vsix
 ```
 
 ## Usage
